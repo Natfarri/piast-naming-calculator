@@ -1,0 +1,1 @@
+# piast-naming-calculator
