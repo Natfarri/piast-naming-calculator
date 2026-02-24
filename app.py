@@ -7,15 +7,16 @@ import matplotlib
 matplotlib.rcParams['font.family'] = 'DejaVu Sans'
 
 st.set_page_config(
-    page_title="Bayes — Dynastic Onomastics",
+    page_title="Bayes — Dynastic Onomastics v28",
     layout="wide"
 )
 
 # --- TYTUŁ I OPIS ---
-st.title("Bayesian Calculator for Dynastic Naming Strategies")
+st.title("Bayesian Calculator for Dynastic Naming Strategies (v28)")
 st.markdown(
-    "**Jaskuła 2026** — Probabilistic model for the name Świętopełk (son of Mieszko I). "
-    "Accompanying software for the article: *Dynastic Naming Strategies in Central Europe (9th–14th Centuries)*"
+    "**Andrzej Jaskuła 2026** — Probabilistic model for the name Świętopełk (son of Mieszko I). "
+    "Accompanying software for the article: *Dynastic Naming Strategies in Central Europe (9th–14th Centuries)*. "
+    "**Updated Sample: n=280** (including Carolingians)."
 )
 
 st.markdown("---")
@@ -48,20 +49,20 @@ with tab1:
     with col_prior:
         st.subheader("1. Priors / Priory P(H)")
         podproba = st.selectbox(
-            "Select reference data / Wybierz dane:",
+            "Select reference data / Wybierz dane (v28):",
             [
-                "Full sample / Cała próba n=258",
-                "10th Century only / Tylko X wiek",
+                "Full sample / Cała próba n=280 (A)",
+                "10th Century only / Tylko X wiek (Xw)",
                 "LOO (excluding Piasts)",
                 "Unconditional / Bezwarunkowy (H)",
                 "Custom / Własne"
             ]
         )
 
-        # Definicje priorów z artykułu
+        # Definicje priorów z artykułu v28 (Tabela 10)
         defaults = {
-            "Full sample / Cała próba n=258": (0.530, 0.400, 0.005, 0.065),
-            "10th Century only / Tylko X wiek": (0.417, 0.450, 0.005, 0.128),
+            "Full sample / Cała próba n=280 (A)": (0.552, 0.393, 0.005, 0.050),
+            "10th Century only / Tylko X wiek (Xw)": (0.417, 0.450, 0.005, 0.128),
             "LOO (excluding Piasts)": (0.356, 0.470, 0.005, 0.169),
             "Unconditional / Bezwarunkowy (H)": (0.085, 0.812, 0.045, 0.058),
             "Custom / Własne": (0.400, 0.400, 0.100, 0.100),
@@ -111,34 +112,36 @@ with tab1:
 # ==============================================================================
 with tab2:
     st.subheader("Sensitivity Analysis Matrix (Post. Mg)")
-    st.write("How changing P(D|Mg) and Prior Mg affects the final result.")
+    st.write("Wpływ zmiany P(D|Mg) oraz Prioru Mg na wynik końcowy (Posterior).")
     
     pdmg_range = [0.4, 0.5, 0.6, 0.7, 0.75]
-    priors_range = [0.085, 0.356, 0.530]
+    priors_range = [0.085, 0.356, 0.417, 0.552] # Unconditional, LOO, 10th C, Full n=280
     
     matrix = []
     for pm in priors_range:
         row = []
         for lm in pdmg_range:
-            # Uproszczony model dla macierzy
+            # Uproszczony model dla macierzy (pozostałe priory proporcjonalnie)
             n_mg = pm * lm
-            n_oth = (1-pm) * 0.08 # średni likelihood dla innych
+            n_oth = (1-pm) * 0.08 # średni waży likelihood dla O/Sp/R
             row.append(f"{n_mg/(n_mg+n_oth):.1%}")
         matrix.append(row)
     
     df_matrix = pd.DataFrame(matrix, index=priors_range, columns=pdmg_range)
     st.table(df_matrix)
+    st.caption("Priors on Y-axis (Mg), Likelihoods on X-axis P(D|Mg).")
 
 # ==============================================================================
 # ZAKŁADKA 3 — SCENARIUSZE
 # ==============================================================================
 with tab3:
-    st.subheader("Reproduction of Table 10 from the Article")
+    st.subheader("Reproduction of Article Scenarios (Table 10)")
     st.markdown("""
-    - **Scenario A (Empirical)**: Post. Mg = 91%
-    - **Scenario LOO (Leave-one-out)**: Post. Mg = 84%
-    - **Scenario H (Unconditional)**: Post. Mg = 43% (Hypothesis O takes the lead)
+    - **Scenario A (Full Empirical n=280)**: Prior Mg = 0.552, P(D|Mg) = 0.75 -> **Post. Mg = 91%**
+    - **Scenario LOO (Leave-one-out)**: Prior Mg = 0.356, P(D|Mg) = 0.75 -> **Post. Mg = 84%**
+    - **Scenario Xw (10th Century)**: Prior Mg = 0.417, P(D|Mg) = 0.75 -> **Post. Mg = 87%**
+    - **Scenario H (Unconditional)**: Prior Mg = 0.085, P(D|Mg) = 0.75 -> **Post. Mg = 43%** (Ojcowska H_O dominuje)
     """)
 
 st.markdown("---")
-st.caption("© 2026 Andrzej Jaskuła | Research Software for 'Early Medieval Europe'")
+st.caption("© 2026 Andrzej Jaskuła | Research Software for 'Early Medieval Europe' | DOI: 10.5281/zenodo.18741761")
